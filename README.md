@@ -51,7 +51,7 @@ The [CArtAgO By Example Guide](https://www.emse.fr/~boissier/enseignement/maop13
 Modify the implementation in [`rogue_agent.asl`](src/agt/rogue_agent.asl) so that the rogue agents broadcast only the temperature reading of the rogue leader agent. 
 - HINTS: 
   - Currently, `rogue_agent.asl` overrides the plan `@read_temperature_plan` of [`sensing_agent.asl`](src/agt/sensing_agent.asl) with a plan for broadcasting one of the first 3 broadcasted temperature readings in the organization. For completing Task 3, your can either modify this plan, or create a new plan.
-  - To check which agent has sent a message, you can use the annotation `source(AgentName)` (e.g. `source(jomi)`). 
+  - To check which agent has sent a message, you can use the annotation `source(AgentName)` (e.g. `source(jomi)`).
   
 ## Task 3
 Modify the implementations in [`sensing_agent.asl`](src/agt/sensing_agent.asl) and [`acting_agent.asl`](src/agt/acting_agent.asl) so that the acting agent asks all agents that have broadcasted a temperature reading for their certified reputation ratings. The acting agent should successfully receive the ratings, and manifest the temperature broadcasted by one of the agents with the highest rating (taking into consideration both certified reputation ratings and average interaction trust ratings).

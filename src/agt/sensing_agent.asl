@@ -1,6 +1,7 @@
 // sensing agent
 
 /* Initial beliefs and rules */
+my_reputation(_).
 
 // infers whether there is a mission for which goal G has to be achieved by an agent with role R
 role_goal(R,G) :- role_mission(R,_,M) & mission_goal(M,G).
@@ -35,6 +36,18 @@ i_have_plans_for(R) :- not (role_goal(R,G) & not has_plan_for(G)).
 	.print("Reading the temperature");
 	readCurrentTemperature(47.42, 9.37, Celcius); // reads the current temperature using the artifact
 	.print("Read temperature (Celcius): ", Celcius);
+
+	.my_name(Ag);
+	.send(acting_agent, tell, witness_reputation(Ag, sensing_agent_1, temperature(10.8), 0.83));
+	.send(acting_agent, tell, witness_reputation(Ag, sensing_agent_2, temperature(10.8), 0.83));
+	.send(acting_agent, tell, witness_reputation(Ag, sensing_agent_3, temperature(10.8), 0.83));
+	.send(acting_agent, tell, witness_reputation(Ag, sensing_agent_4, temperature(10.8), 0.83));
+	.send(acting_agent, tell, witness_reputation(Ag, sensing_agent_5, temperature(11.3), 0.08));
+	.send(acting_agent, tell, witness_reputation(Ag, sensing_agent_6, temperature(11.1), -0.08));
+	.send(acting_agent, tell, witness_reputation(Ag, sensing_agent_7, temperature(10.9), -0.16));
+	.send(acting_agent, tell, witness_reputation(Ag, sensing_agent_8, temperature(11.3), 0.16));
+	.send(acting_agent, tell, witness_reputation(Ag, sensing_agent_9, temperature(-2), -0.75));
+
 	.broadcast(tell, temperature(Celcius)). // broadcasts the temperature reading
 
 /* 
@@ -83,7 +96,17 @@ i_have_plans_for(R) :- not (role_goal(R,G) & not has_plan_for(G)).
  * Body: prints new certified reputation rating (relevant from Task 3 and on)
 */
 +certified_reputation(CertificationAgent, SourceAgent, MessageContent, CRRating): true <-
+	-+my_reputation(certified_reputation(CertificationAgent, SourceAgent, MessageContent, CRRating));
 	.print("Certified Reputation Rating: (", CertificationAgent, ", ", SourceAgent, ", ", MessageContent, ", ", CRRating, ")").
+
+
++request_for_certificate[source(Ag)]: true <-
+	.print("Got request to send my certificate.");
+	?my_reputation(CertifiedReputation);
+	.send(Ag, tell, CertifiedReputation).
+
++trust_rating(TargetAgent, MessageContent, WRRating): true <-
+    !received_trust_rating(TargetAgent, MessageContent, WRRating).
 
 /* Import behavior of agents that work in CArtAgO environments */
 { include("$jacamoJar/templates/common-cartago.asl") }

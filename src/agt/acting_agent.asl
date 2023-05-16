@@ -45,7 +45,9 @@ robot_td("https://raw.githubusercontent.com/Interactions-HSG/example-tds/main/td
 @available_role_plan
 +available_role(Role) : true <-
 	.print("Adopting the role of ", Role);
-	adoptRole(Role).
+	adoptRole(Role);
+
+	!ask_for_certificates.
 
 /* 
  * Plan for reacting to the addition of the belief interaction_trust(TargetAgent, SourceAgent, MessageContent, ITRating)
@@ -53,26 +55,29 @@ robot_td("https://raw.githubusercontent.com/Interactions-HSG/example-tds/main/td
  * Context: true (the plan is always applicable)
  * Body: prints new interaction trust rating (relevant from Task 1 and on)
 */
-+interaction_trust(TargetAgent, SourceAgent, MessageContent, ITRating): true <-
-	.print("Interaction Trust Rating: (", TargetAgent, ", ", SourceAgent, ", ", MessageContent, ", ", ITRating, ")").
++interaction_trust(SourceAgent, TargetAgent, temperature(Temp), ITRating): true <-
+	.print("Interaction Trust Rating: (", SourceAgent, ", ", TargetAgent, ", ", Temp, ", ", ITRating, ")");
+	addInteractionTrustRating(SourceAgent, TargetAgent, Temp, ITRating)[artifact_id(ReputationManagerId)].
 
 /* 
- * Plan for reacting to the addition of the certified_reputation(CertificationAgent, SourceAgent, MessageContent, CRRating)
- * Triggering event: addition of belief certified_reputation(CertificationAgent, SourceAgent, MessageContent, CRRating)
+ * Plan for reacting to the addition of the certified_reputation(CertificationAgent, TargetAgent, MessageContent, CRRating)
+ * Triggering event: addition of belief certified_reputation(CertificationAgent, TargetAgent, MessageContent, CRRating)
  * Context: true (the plan is always applicable)
  * Body: prints new certified reputation rating (relevant from Task 3 and on)
 */
-+certified_reputation(CertificationAgent, SourceAgent, MessageContent, CRRating): true <-
-	.print("Certified Reputation Rating: (", CertificationAgent, ", ", SourceAgent, ", ", MessageContent, ", ", CRRating, ")").
++certified_reputation(CertificationAgent, TargetAgent, temperature(Temp), CRRating): true <-
+	.print("Certified Reputation Rating: (", CertificationAgent, ", ", TargetAgent, ", ", Temp, ", ", CRRating, ")");
+	addCertificationTrustRating(CertificationAgent, TargetAgent, Temp, CRRating)[artifact_id(ReputationManagerId)].
 
 /* 
- * Plan for reacting to the addition of the witness_reputation(WitnessAgent, SourceAgent, MessageContent, WRRating)
- * Triggering event: addition of belief witness_reputation(WitnessAgent, SourceAgent,, MessageContent, WRRating)
+ * Plan for reacting to the addition of the witness_reputation(WitnessAgent, TargetAgent, MessageContent, WRRating)
+ * Triggering event: addition of belief witness_reputation(WitnessAgent, TargetAgent, MessageContent, WRRating)
  * Context: true (the plan is always applicable)
  * Body: prints new witness reputation rating (relevant from Task 5 and on)
 */
-+witness_reputation(WitnessAgent, SourceAgent, MessageContent, WRRating): true <-
-	.print("Witness Reputation Rating: (", WitnessAgent, ", ", SourceAgent, ", ", MessageContent, ", ", WRRating, ")").
++witness_reputation(WitnessAgent, TargetAgent, temperature(Temp), WRRating): true <-
+	.print("Witness Reputation Rating: (", WitnessAgent, ", ", TargetAgent, ", ", temperature(Temp), ", ", WRRating, ")");
+	addWitnessRating(WitnessAgent, TargetAgent, Temp, WRRating)[artifact_id(ReputationManagerId)].
 
 /* 
  * Plan for reacting to the addition of the goal !select_reading(TempReadings, Celcius)
@@ -82,8 +87,12 @@ robot_td("https://raw.githubusercontent.com/Interactions-HSG/example-tds/main/td
 */
 @select_reading_task_0_plan
 +!select_reading(TempReadings, Celcius) : true <-
-    .nth(0, TempReadings, Celcius).
-
+	getAgentWithHighestRating(WinnerAgent)[artifact_id(ReputationManagerId)];
+	.print("The most reliable agent is ", WinnerAgent);
+	getCurrentTempForAgent(WinnerAgent, Current);
+	.print("Current Temperature is ", Current);
+	Celcius = Current.
+	
 /* 
  * Plan for reacting to the addition of the goal !manifest_temperature
  * Triggering event: addition of goal !manifest_temperature
@@ -120,6 +129,20 @@ robot_td("https://raw.githubusercontent.com/Interactions-HSG/example-tds/main/td
 
 	// invokes the action onto:SetWristAngle for manifesting the temperature with the wrist of the robotic arm
 	invokeAction("https://ci.mines-stetienne.fr/kg/ontology#SetWristAngle", ["https://www.w3.org/2019/wot/json-schema#IntegerSchema"], [Degrees])[artifact_id(leubot1)].
+
+/* 
+ * Plan for reacting to the addition of the belief ask_for_certificates
+ * Context: true (the plan is always applicable)
+ * Body: asks all sensing agents to send their certificates
+*/
+@ask_for_certificates_plan
++!ask_for_certificates: true <-
+	.wait(2000);
+	.print("Please send your certificate.");
+	.broadcast(tell, request_for_certificate).
+
++temperature(TempReading)[source(Ag)]: true <-
+	addCurrentTempForAgent(Ag, TempReading).
 
 /* Import behavior of agents that work in CArtAgO environments */
 { include("$jacamoJar/templates/common-cartago.asl") }

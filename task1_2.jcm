@@ -39,5 +39,7 @@ mas lab {
     workspace lab {
         artifact weatherStation: tools.WeatherStation
         artifact converter: tools.Converter
+        artifact reputationManager: tools.ReputationManager
+        artifact tempReadingManager: tools.TempReadingManager
     }
 }

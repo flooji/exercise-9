@@ -61,7 +61,7 @@ has_enough_players_for(R,G) :-
 @manage_formation_status_nok
 +!manage_formation(G) : group(GroupName,_,G)[artifact_name(_,OrgName)] &
   not formationStatus(ok)[artifact_id(G)] <-  
-    .wait(15000);
+    .wait(10000);
     .findall(Role, role(Role, Super) & not has_enough_players_for(Role,GroupName), AvailableRoles);
     .print("Inferred the available roles of group ", GroupName, ": ", AvailableRoles);
     !broadcast_available_roles(AvailableRoles);
